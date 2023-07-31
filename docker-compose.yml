@@ -24,8 +24,6 @@ x-sentry-defaults: &sentry_defaults
     args:
       - SENTRY_IMAGE
   depends_on:
-    redis:
-      <<: *depends_on-healthy
     kafka:
       <<: *depends_on-healthy
     postgres:
@@ -88,14 +86,12 @@ x-snuba-defaults: &snuba_defaults
       <<: *depends_on-healthy
     kafka:
       <<: *depends_on-healthy
-    redis:
-      <<: *depends_on-healthy
   image: "$SNUBA_IMAGE"
   environment:
     SNUBA_SETTINGS: self_hosted
     CLICKHOUSE_HOST: clickhouse
     DEFAULT_BROKERS: "kafka:9092"
-    REDIS_HOST: redis
+    REDIS_HOST: 192.168.0.201
     UWSGI_MAX_REQUESTS: "10000"
     UWSGI_DISABLE_LOGGING: "true"
     # Leaving the value empty to just pass whatever is set
@@ -117,18 +113,6 @@ services:
       <<: *healthcheck_defaults
       # From: https://stackoverflow.com/a/31877626/5155484
       test: echo stats | nc 127.0.0.1 11211
-  redis:
-    <<: *restart_policy
-    image: "redis:6.2.12-alpine"
-    healthcheck:
-      <<: *healthcheck_defaults
-      test: redis-cli ping
-    volumes:
-      - "sentry-redis:/data"
-    ulimits:
-      nofile:
-        soft: 10032
-        hard: 10032
   postgres:
     <<: *restart_policy
     # Using the same postgres version as Sentry dev for consistency purposes
@@ -336,7 +320,7 @@ services:
       - '443:443'
     environment:
       DOMAINS: 'sentry.cloudnativedays.jp -> http://nginx:80'
-      STAGE: 'staging' # Don't use production until staging works
+      STAGE: 'production' # Don't use production until staging works
     volumes:
       - https-portal-data:/var/lib/https-portal
     depends_on:
@@ -412,8 +396,6 @@ services:
     depends_on:
       kafka:
         <<: *depends_on-healthy
-      redis:
-        <<: *depends_on-healthy
       web:
         <<: *depends_on-healthy
   vroom:
@@ -450,8 +432,6 @@ volumes:
   sentry-data:
     external: true
   sentry-postgres:
-    external: true
-  sentry-redis:
     external: true
   sentry-zookeeper:
     external: true
