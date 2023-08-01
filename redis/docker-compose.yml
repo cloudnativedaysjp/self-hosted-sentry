@@ -13,17 +13,15 @@ x-healthcheck-defaults: &healthcheck_defaults
 
 services:
   redis:
-    <<: *restart_policy
+    image: redis:6.2.12-alpine
     healthcheck:
       <<: *healthcheck_defaults
       test: redis-cli ping
-    image: redis:6.2.12-alpine
-    command: ["redis-server", "/etc/redis/redis.conf"]
+    <<: *restart_policy
     environment:
       TZ: Asia/Tokyo
     volumes:
       - redis-data:/data
-      - ./redis.conf:/etc/redis/redis.conf
     ulimits:
       nofile:
         soft: 10032
@@ -38,6 +36,17 @@ services:
       TZ: Asia/Tokyo
     ports:
       - 9121:9121
+  prometheus:
+    image: prom/prometheus:v2.37.9
+    command: "--config.file=/etc/prometheus/prometheus.yml"
+    healthcheck:
+      <<: *healthcheck_defaults
+      test: ["CMD", "wget", "http://localhost:9090"]
+    <<: *restart_policy
+    volumes:
+      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+    ports:
+      - 9090:9090
 
 volumes:
   redis-data:
