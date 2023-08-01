@@ -36,17 +36,6 @@ services:
       TZ: Asia/Tokyo
     ports:
       - 9121:9121
-  prometheus:
-    image: prom/prometheus:v2.37.9
-    command: "--config.file=/etc/prometheus/prometheus.yml"
-    healthcheck:
-      <<: *healthcheck_defaults
-      test: ["CMD", "wget", "http://localhost:9090"]
-    <<: *restart_policy
-    volumes:
-      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
-    ports:
-      - 9090:9090
 
 volumes:
   redis-data:
