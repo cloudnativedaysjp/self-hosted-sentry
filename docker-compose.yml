@@ -141,6 +141,12 @@ services:
         read_only: true
         source: ./postgres/
         target: /opt/sentry/
+  postgres-exporter:
+    image: quay.io/prometheuscommunity/postgres-exporter:v0.13.2
+    environment:
+      DATA_SOURCE_NAME: "postgresql://postgres:@postgres:5432/postgres?sslmode=disable"
+    ports:
+      - 9187:9187
   zookeeper:
     <<: *restart_policy
     image: "confluentinc/cp-zookeeper:5.5.7"
@@ -191,6 +197,21 @@ services:
     healthcheck:
       <<: *healthcheck_defaults
       test: ["CMD-SHELL", "nc -z localhost 9092"]
+      interval: 10s
+      timeout: 10s
+      retries: 30
+  kafka-exporter:
+    <<: *restart_policy
+    depends_on:
+      kafka:
+        <<: *depends_on-healthy
+    image: danielqsj/kafka-exporter:v1.7.0
+    restart: always
+    ports:
+      - 9308:9308
+    healthcheck:
+      <<: *healthcheck_defaults
+      test: ["CMD-SHELL", "nc -z localhost 9308"]
       interval: 10s
       timeout: 10s
       retries: 30
@@ -320,7 +341,7 @@ services:
       - '443:443'
     environment:
       DOMAINS: 'sentry.cloudnativedays.jp -> http://nginx:80'
-      STAGE: 'production' # Don't use production until staging works
+      STAGE: 'staging' # Don't use production until staging works
     volumes:
       - https-portal-data:/var/lib/https-portal
     depends_on:
@@ -426,6 +447,17 @@ services:
     command: '"0 0 * * * find /var/lib/sentry-profiles -type f -mtime +$SENTRY_EVENT_RETENTION_DAYS -delete"'
     volumes:
       - sentry-vroom:/var/lib/sentry-profiles
+  prometheus:
+    image: prom/prometheus:v2.37.9
+    command: "--config.file=/etc/prometheus/prometheus.yml"
+    healthcheck:
+      <<: *healthcheck_defaults
+      test: ["CMD", "wget", "http://localhost:9090"]
+    <<: *restart_policy
+    volumes:
+      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+    ports:
+      - 9090:9090
 
 volumes:
   # These store application data that should persist across restarts.
