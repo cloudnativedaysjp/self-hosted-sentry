@@ -487,3 +487,4 @@ volumes:
   sentry-smtp-log:
   sentry-clickhouse-log:
   https-portal-data:
+  prometheus-data:
