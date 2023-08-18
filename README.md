@@ -52,6 +52,12 @@ Run `docker compose up -d` in your local check-out.
 docker compsoe up -d
 ```
 
+optional: stop and remove postgres and exporter
+
+```sh
+docker compose stop postgres postgres-exporter; docker compose rm postgres postgres-exporter
+```
+
 ### Redis VM
 
 Clone the repo and run `docker compose up -d` in your `redis/`.
@@ -62,7 +68,41 @@ cd redis; docker compose up -d
 
 ### PostgreSQL VM
 
-TBD
+Clone the repo and run `./install.sh` in your local check-out.
+
+```sh
+./install.sh
+```
+
+Then, modify connection settings.
+
+`relay/config.yml`
+
+```diff
+- redis: redis:redis:6379
++ redis: redis://192.168.0.201:6379
+```
+
+`sentry.conf.yml`
+
+```diff
+- SENTRY_OPTIONS["redis.clusters"] = {
+-     "default": {
+-         "hosts": {0: {"host": "redis", "password": "", "port": "6379", "db": "0"}}
+-     }
+- }
++ SENTRY_OPTIONS["redis.clusters"] = {
++     "default": {
++         "hosts": {0: {"host": "192.168.0.201", "password": "", "port": "6379", "db": "0"}}
++     }
++ }
+```
+
+Run `docker compose -f docker-compose-postgres.yml up -d` in your local check-out.
+
+```sh
+docker compose -f docker-compose-postgres.yml up -d
+```
 
 ## Reference
 
