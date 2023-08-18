@@ -10,6 +10,9 @@ fi
 if [ $1 == "postgres" ]
 then
   source install/install-wal2json.sh
+  source install/create-docker-volumes.sh
+  source install/upgrade-postgres.sh
+  source install/set-up-and-migrate-database.sh
 else
   source install/_lib.sh
   # Pre-flight. No impact yet.
