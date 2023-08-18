@@ -341,7 +341,7 @@ services:
       - '443:443'
     environment:
       DOMAINS: 'sentry.cloudnativedays.jp -> http://nginx:80'
-      STAGE: 'staging' # Don't use production until staging works
+      STAGE: 'production' # Don't use production until staging works
     volumes:
       - https-portal-data:/var/lib/https-portal
     depends_on:
@@ -449,7 +449,7 @@ services:
       - sentry-vroom:/var/lib/sentry-profiles
   prometheus:
     image: prom/prometheus:v2.37.9
-    command: "--config.file=/etc/prometheus/prometheus.yml"
+    command: "--config.file=/etc/prometheus/prometheus.yml --storage.tsdb.retention.time=30d --storage.tsdb.retention.size=15GB"
     healthcheck:
       <<: *healthcheck_defaults
       test: ["CMD", "wget", "http://localhost:9090"]
