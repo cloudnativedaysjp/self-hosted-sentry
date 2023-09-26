@@ -30,7 +30,7 @@ services:
         "max_wal_senders=1",
       ]
     environment:
-      POSTGRES_HOST_AUTH_METHOD: "trust"
+      POSTGRES_PASSWORD: ChangeMe
       TZ: "Asia/Tokyo"
     entrypoint: /opt/sentry/postgres-entrypoint.sh
     volumes:
