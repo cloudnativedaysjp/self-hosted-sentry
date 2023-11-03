@@ -14,11 +14,3 @@ scrape_configs:
     static_configs:
       - targets:
         - postgres-exporter:9187
-  - job_name: sentry-node
-    static_configs:
-      - targets:
-        - node-exporter:9100
-  - job_name: redis-node
-    static_configs:
-      - targets:
-        - 192.168.0.201:9100
