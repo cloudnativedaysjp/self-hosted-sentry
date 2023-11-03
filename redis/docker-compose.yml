@@ -42,6 +42,22 @@ services:
       TZ: Asia/Tokyo
     ports:
       - 9121:9121
+  node-exporter:
+    image: prom/node-exporter:latest
+    <<: *default_policy
+    volumes:
+      - /proc:/host/proc:ro
+      - /sys:/host/sys:ro
+      - /:/rootfs:ro
+    command:
+      - '--path.procfs=/host/proc'
+      - '--path.rootfs=/rootfs'
+      - '--path.sysfs=/host/sys'
+      - '--collector.filesystem.mount-points-exclude=^/(sys|proc|dev|host|etc)($$|/)'
+    expose:
+      - 9100
+    ports:
+      - 9100:9100
 
 volumes:
   redis-data:
